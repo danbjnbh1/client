@@ -1,0 +1,24 @@
+@import '../../Note/Note.module.scss';
+@import '../../App.module.scss';
+
+.invalidLogin {
+  font-size: 1rem !important;
+  color: red;
+}
+
+.loginForm {
+  width: 500px;
+  height: 390px;
+  margin: 50px auto;
+  float: none;
+  padding: 50px;
+}
+
+.loginButtonsDiv {
+  margin-top: 50px;
+}
+
+input{
+  background-color: inherit !important;
+  color: inherit !important;
+}

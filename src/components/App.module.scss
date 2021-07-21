@@ -1,0 +1,14 @@
+$darkHeaderColor: #30475e;
+$primaryYellow: #f5ba13;
+
+@mixin primaryDark {
+  background-color: #222831;
+  color: #dddddd;
+  box-shadow: 0 3px 5px rgb(10, 10, 10);
+}
+
+@mixin secondaryDark {
+  background-color: $darkHeaderColor !important;
+  color: #dddddd !important;
+  box-shadow: 0 3px 5px rgb(14, 13, 13) !important;
+}

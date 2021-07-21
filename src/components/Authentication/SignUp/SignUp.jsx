@@ -1,40 +1,45 @@
 import React, { useState, useContext } from 'react';
-import { themeContext } from './App';
-
+import { themeContext, userContext } from '../../App';
+import styles from './SignUp.module.scss';
+import Loader from 'react-loader-spinner';
+import axios from 'axios';
 
 function SignUp(props) {
+  const { setUser } = useContext(userContext);
   const { darkTheme } = useContext(themeContext);
 
-  // TODO remove unnessery null
-  const [name, setName] = useState(null);
-  const [nameValid, setNameValid] = useState(false);
-  const [passwordValid, setPasswordValid] = useState(false);
-  const [password, setPassword] = useState(null);
-  const [password2Valid, setPassword2Valid] = useState(false);
-  const [password2, setPassword2] = useState(null);
-  const [emailValid, setEmailValid] = useState(false);
-  const [email, setEmail] = useState(null);
+  const [name, setName] = useState();
+  const [nameValid, setNameValid] = useState();
+  const [passwordValid, setPasswordValid] = useState();
+  const [password, setPassword] = useState();
+  const [password2Valid, setPassword2Valid] = useState();
+  const [password2, setPassword2] = useState();
+  const [emailValid, setEmailValid] = useState();
+  const [email, setEmail] = useState();
+  const [signUpLoader, setSignUpLoader] = useState(false);
+  const [error, setError] = useState();
 
-  function sendSignUp(event) {
+  const signUpHttp = axios.create({
+    baseURL: `https://keeperplus.herokuapp.com/signUp`,
+  });
+
+  async function sendSignUp(event) {
     event.preventDefault();
+
     if (nameValid && emailValid && passwordValid && password2Valid) {
-      const requestOptions = {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name, password: password, email: email }),
-      };
-      fetch('https://keeperplus.herokuapp.com/signUp', requestOptions)
-        .then((response) => response.json())
-        .then((data) => {
-          if (data === 'this email exist'){
-            setEmailValid(false)
-            document.getElementById("invalid-email").innerHTML = "This email already exists"
-          } else {
-            props.setuser({ data });
-          }
-        });
+      setSignUpLoader(true);
+
+      let { data } = await signUpHttp.post('', { name, email, password });
+      setSignUpLoader(false);
+      if (data === 'this email exist') {
+        setEmailValid('This email already exists');
+        // document.getElementById('invalid-email').innerHTML =
+        //   'This email already exists';
+      } else {
+        setUser({ data });
+      }
     } else {
-      return;
+      setError('Please fill in all the fields correctly');
     }
   }
 
@@ -46,13 +51,14 @@ function SignUp(props) {
     if (re.test(String(input).toLowerCase())) {
       setEmailValid(true);
     } else {
-      setEmailValid(false);
+      setEmailValid('invalid email.');
+      // document.getElementById('invalid-email').innerHTML = 'invalid email.';
     }
   }
   function nameChange(event) {
     const input = event.target.value;
     setName(input);
-    if (/^[a-zA-Z]+$/.test(input)) {
+    if (/^[a-zA-Z\s]*$/.test(input)) {
       setNameValid(true);
     } else {
       setNameValid(false);
@@ -83,14 +89,15 @@ function SignUp(props) {
 
   return (
     <div
-      className={'note ' + (darkTheme ? 'darkTheme-body-note-addDiv' : null)}
-      id="login-div"
+      className={`${styles.note} + ${darkTheme ? styles.dark : null} + ${
+        styles.SignUpForm
+      }`}
     >
       <h1>Sign Up</h1>
       <br />
       <form onSubmit={sendSignUp}>
         <div className="mb-4">
-          <label htmlfor="InputUserName" class="form-label">
+          <label htmlFor="InputUserName" className="form-label">
             Name
           </label>
           <input
@@ -109,7 +116,7 @@ function SignUp(props) {
           </div>
         </div>
         <div className="mb-4">
-          <label htmlfor="InputEmail1" class="form-label">
+          <label htmlFor="InputEmail1" className="form-label">
             Email address
           </label>
           <input
@@ -117,17 +124,19 @@ function SignUp(props) {
             type="email"
             className={
               'form-control ' +
-              (emailValid && email ? 'is-valid ' : '') +
-              (!emailValid && email ? 'is-invalid ' : '')
+              (emailValid === true && email ? 'is-valid ' : '') +
+              (emailValid !== true && email ? 'is-invalid ' : '')
             }
             id="InputEmail1"
             aria-describedby="emailHelp"
           />
           <div className="valid-feedback">Looks good!</div>
-          <div id="invalid-email" className="invalid-feedback">invalid email.</div>
+          <div id="invalid-email" className="invalid-feedback">
+            {emailValid}
+          </div>
         </div>
         <div className="mb-4">
-          <label htmlfor="InputPassword1" class="form-label">
+          <label htmlFor="InputPassword1" className="form-label">
             Password
           </label>
           <input
@@ -147,7 +156,7 @@ function SignUp(props) {
           </div>
         </div>
         <div className="mb-4">
-          <label htmlfor="InputPassword2" class="form-label">
+          <label htmlFor="InputPassword2" className="form-label">
             Confirm Password
           </label>
           <input
@@ -162,13 +171,27 @@ function SignUp(props) {
           />
           <div className="valid-feedback">Looks good!</div>
           <div className="invalid-feedback">
-            Password verification should be the same as a valid genuine
-            password.
+            The passwords must be the same.
           </div>
         </div>
-        <button type="submit" className="btn btn-warning">
-          Sign Up
-        </button>
+        <p className={styles.invalidLogin}>{error}</p>
+        {signUpLoader ? (
+          <Loader type="TailSpin" height={20} width={20} />
+        ) : (
+          <div className={!error && styles.loginButtonsDiv}>
+            <button type="submit" className="btn btn-warning">
+              Sign Up
+            </button>
+            <p className="ms-2 d-inline"></p>
+            <button
+              className="btn-link"
+              onClick={() => props.setIsRegister(true)}
+            >
+              Log in with an existing user
+            </button>
+            <p />
+          </div>
+        )}
       </form>
     </div>
   );

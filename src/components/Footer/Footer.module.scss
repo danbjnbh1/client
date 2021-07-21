@@ -1,0 +1,17 @@
+.footerPadding {
+  clear: both;
+  padding-bottom: 120px;
+}
+
+footer {
+  text-align: center;
+  bottom: 0;
+  width: 100%;
+  height: 2.5rem;
+  margin: auto -16px;
+  position: absolute;
+  display: block;
+  p {
+    color: #ccc;
+  }
+}

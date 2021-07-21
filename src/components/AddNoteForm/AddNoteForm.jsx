@@ -1,12 +1,16 @@
 import React, { useState, useContext } from 'react';
-import { themeContext } from './App';
+import { themeContext } from '../App';
 import Fab from '@material-ui/core/Fab';
+import styles from './AddNoteForm.module.scss'
+import classNames from 'classnames/bind';
 
-function AddDiv(props) {
+function AddNoteForm(props) {
   const { darkTheme } = useContext(themeContext);
 
   const [titleText, setTitleText] = useState('');
   const [contentText, setContentText] = useState('');
+
+  const classes = classNames.bind(styles);
 
   function handleChange(event) {
     const target = event.target.id;
@@ -21,8 +25,7 @@ function AddDiv(props) {
   return (
     <div>
       <div
-        id="add-note-div"
-        className={'note ' + (darkTheme ? 'darkTheme-body-note-addDiv' : null)}
+      className={classes('note', 'addNoteDiv', {'dark': darkTheme})}
       >
         <input
           id="title"
@@ -46,7 +49,7 @@ function AddDiv(props) {
             setContentText('');
             setTitleText('');
           }}
-          class={'add-btn ' + (darkTheme ? 'darkTheme-header-btn' : null)}
+          class={`${styles.addBtn} + ${darkTheme ? styles.dark : null}`}
         >
           add
         </Fab>
@@ -55,4 +58,4 @@ function AddDiv(props) {
   );
 }
 
-export default AddDiv;
+export default AddNoteForm;

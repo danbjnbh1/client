@@ -1,15 +1,19 @@
 import React, { useState, useEffect, createContext } from 'react';
-import Header from './Header';
-import Note from './Note';
-import Footer from './Footer';
-import AddDiv from './AddDiv';
-import AddBtn from './AddBtn';
-import SignIn from './SignIn';
+import Title from './Header/Title/Title';
+import { NoteBoard } from './NoteBoard';
+import { Footer } from './Footer';
+import { AuthenticationRouting } from './Authentication/AuthenticationRouting';
+import loading2 from '../images/loading2.gif';
+import axios from 'axios';
 
 const themeContext = createContext();
+const userContext = createContext();
+const loaderContext = createContext();
 
 function App() {
-  const [user, setuser] = useState(false);
+  const [user, setUser] = useState(false);
+
+  const [isloading, setIsLoading] = useState(false);
 
   const [DBnotes, setDBnotes] = useState([]);
   const [darkTheme, setDarkTheme] = useState(false);
@@ -17,114 +21,74 @@ function App() {
   useEffect(() => {
     const bodyElt = document.querySelector('html');
     if (darkTheme) {
-      bodyElt.classList.add('darkTheme-body-note-addDiv');
+      bodyElt.classList.add('darkTheme-body');
     } else {
-      bodyElt.classList.remove('darkTheme-body-note-addDiv');
+      bodyElt.classList.remove('darkTheme-body');
     }
   }, [darkTheme]);
 
   useEffect(() => {
-    if (user.data) {
-      fetch('https://keeperplus.herokuapp.com/notes/' + user.data._id)
-        .then((response) => response.json())
-        .then((data) => setDBnotes(data));
+    async function fetchData() {
+      if (user.data) {
+        setIsLoading(true);
+        const response = await axios.get(
+          `https://keeperplus.herokuapp.com/${user.data._id}/notes`
+        );
+
+        setDBnotes(response.data);
+        setIsLoading(false);
+      }
     }
+    fetchData();
   }, [user]);
 
   useEffect(() => {
-    const user = localStorage.getItem('user');
-    console.log(user);
-    if (user) {
-      setuser(JSON.parse(user));
+    const themeStorage = sessionStorage.getItem('darkTheme') === 'true';
+    const userStorage = localStorage.getItem('user');
+
+    setDarkTheme(themeStorage);
+    if (userStorage) {
+      setUser(JSON.parse(userStorage));
     }
   }, []);
 
   function logout() {
     localStorage.removeItem('user');
-    setuser(false);
+    setUser(false);
   }
 
-  function addNote(title, content) {
-    if (title === '') {
-      title = 'New Note';
-    }
-    if (content === '') {
-      content = 'Type here';
-    }
-
-    const requestOptions = {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title: title, content: content }),
-    };
-    fetch('https://keeperplus.herokuapp.com/add/' + user.data._id, requestOptions)
-      .then((response) => response.json())
-      .then((data) => setDBnotes(data));
-  }
-
-  function deleteNote(noteId) {
-    const requestOptions = {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ noteId: noteId }),
-    };
-    fetch('https://keeperplus.herokuapp.com/delete/' + user.data._id, requestOptions)
-      .then((response) => response.json())
-      .then((data) => setDBnotes(data));
-  }
-
-  function editNote(noteId, event) {
-    const value = event.target.innerHTML;
-    const elementToChange = event.target.getAttribute('name'); //The type of the element: title or content
-
-    const requestOptions = {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        noteId: noteId,
-        value: value,
-        elementToChange: elementToChange,
-      }),
-    };
-    fetch('https://keeperplus.herokuapp.com/update/' + user.data._id, requestOptions)
-      .then((response) => response.json())
-      .then((data) => setDBnotes(data));
-  }
-  if (!user) {
-    return (
+  return (
+    <userContext.Provider value={{ user, logout, setUser }}>
       <themeContext.Provider value={{ darkTheme, setDarkTheme }}>
-        <div>
-          <Header />
-          <SignIn setuser={setuser} user={user} />
-          <Footer />
-        </div>
+        <loaderContext.Provider value={{ setIsLoading }}>
+          {isloading ? (
+            <>
+              <img src={loading2} className="mainLoader" alt="" />
+            </>
+          ) : (
+            <>
+              <div>
+                {!user ? (
+                  <>
+                    <Title />
+                    <AuthenticationRouting />
+                  </>
+                ) : (
+                  <>
+                    <Title logout={logout} user={user} />
+                    <NoteBoard DBnotes={DBnotes} setDBnotes={setDBnotes} />
+                    <Footer />
+                  </>
+                )}
+                <Footer />
+              </div>
+            </>
+          )}
+        </loaderContext.Provider>
       </themeContext.Provider>
-    );
-  } else {
-    return (
-      <themeContext.Provider value={{ darkTheme, setDarkTheme }}>
-        <div>
-          <Header logout={logout} user={user} />
-          <AddDiv addNote={addNote} />
-          {DBnotes.map((note, index) => {
-            return (
-              <Note
-                key={index}
-                id={note._id}
-                noteHeading={note.title}
-                noteContent={note.content}
-                deleteFunction={deleteNote}
-                editNote={editNote}
-              />
-            );
-          })}
-          <AddBtn addNote={addNote} />
-          <Footer />
-        </div>
-      </themeContext.Provider>
-    );
-  }
+    </userContext.Provider>
+  );
 }
 
 export default App;
-export { themeContext };
+export { themeContext, userContext, loaderContext };
