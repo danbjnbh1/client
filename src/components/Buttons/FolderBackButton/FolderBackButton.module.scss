@@ -1,0 +1,21 @@
+@import '../../App.module.scss';
+
+.button {
+  background-color: darkgray;
+  box-shadow: 0 4px 12px #ccc;
+  border: 2px solid transparent;
+  font-size: 3rem;
+  color: white;
+  height: 4rem;
+  width: 4rem;
+  border-radius: 100%;
+  position: fixed;
+  right: 5rem;
+  bottom: 14rem;
+  align-items: center;
+  vertical-align: unset;
+  &.dark {
+    @include secondaryDark();
+    background-color: darkgray !important;
+  }
+}

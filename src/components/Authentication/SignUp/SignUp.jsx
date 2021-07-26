@@ -19,8 +19,10 @@ function SignUp(props) {
   const [signUpLoader, setSignUpLoader] = useState(false);
   const [error, setError] = useState();
 
+  const localURL = `http://localhost:3001/signUp`;
+  const herokuURL = `https://keeperplus.herokuapp.com/signUp`;
   const signUpHttp = axios.create({
-    baseURL: `https://keeperplus.herokuapp.com/signUp`,
+    baseURL: localURL,
   });
 
   async function sendSignUp(event) {
@@ -33,8 +35,6 @@ function SignUp(props) {
       setSignUpLoader(false);
       if (data === 'this email exist') {
         setEmailValid('This email already exists');
-        // document.getElementById('invalid-email').innerHTML =
-        //   'This email already exists';
       } else {
         setUser({ data });
       }

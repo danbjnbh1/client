@@ -1,18 +1,16 @@
-import React, { useState, useContext } from 'react';
-import { useRef } from 'react';
+import React, { useState, useContext, useRef,useEffect } from 'react';
 import deleteImg from '../../images/deleteNote.png';
 import { themeContext } from '../App';
 import styles from './Note.module.scss';
 import { TextareaAutosize } from '@material-ui/core';
-import { useEffect } from 'react';
 import classNames from 'classnames/bind';
 
 function Note(props) {
   const { darkTheme } = useContext(themeContext);
 
   const [isOver, setIsOver] = useState(false);
-  const [title, setTitle] = useState();
-  const [content, setContent] = useState();
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
   const timer = useRef();
 
   let classes = classNames.bind(styles)

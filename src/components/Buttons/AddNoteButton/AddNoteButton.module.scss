@@ -1,6 +1,6 @@
-@import "../App.module.scss";
+@import '../../App.module.scss';
 
-.addBtn {
+.addButton {
   background-color: #f5ba13;
   box-shadow: 0 4px 12px #ccc;
   border: 2px solid transparent;
@@ -14,8 +14,10 @@
   bottom: 4rem;
   align-items: center;
   vertical-align: unset;
-  &.dark{
+  &.dark {
     @include secondaryDark();
   }
+  &:hover {
+    background-color: #f5ba13;
+  }
 }
-

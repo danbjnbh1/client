@@ -1,5 +1,16 @@
+@import '../App.module.scss';
 
-.addLoader{
+.addLoader {
   float: left;
   margin: 40px 300px 0 100px;
+}
+
+.folderTitle {
+  text-align: center;
+  font-family: 'McLaren', cursive;
+  font-weight: 200;
+
+  &.dark {
+    color: #fff;
+  }
 }

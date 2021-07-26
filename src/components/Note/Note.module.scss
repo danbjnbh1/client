@@ -1,8 +1,4 @@
-@mixin primaryDark {
-  background-color: #222831;
-  color: #dddddd;
-  box-shadow: 0 3px 5px rgb(10, 10, 10);
-}
+@import '../App.module.scss';
 
 .note {
   position: relative;

@@ -1,0 +1,36 @@
+@import '../App.module.scss';
+
+.folder {
+  position: relative;
+  background: #fff;
+  border-radius: 7px;
+  box-shadow: 0 2px 5px #ccc;
+  padding: 10px 10px 25px;
+  width: 240px;
+  margin: 16px;
+  height: 50px;
+  float: left;
+  vertical-align: top;
+  &.dark {
+    @include primaryDark();
+  }
+  input{
+    border: none;
+  }
+}
+
+.folderName{
+  width: 160px;
+  display: inline-block;
+  font-weight: bold;
+  font-size: 1.1em;
+  margin-left: 9px;
+  bottom: 5px;
+  position: relative;
+}
+
+.folderOptionsButton{
+  position: absolute;
+  right: 0px;
+  top: 0px;
+}

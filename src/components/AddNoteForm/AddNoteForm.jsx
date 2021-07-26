@@ -49,7 +49,7 @@ function AddNoteForm(props) {
             setContentText('');
             setTitleText('');
           }}
-          class={`${styles.addBtn} + ${darkTheme ? styles.dark : null}`}
+          class={classes('addBtn', {dark: darkTheme})}
         >
           add
         </Fab>
