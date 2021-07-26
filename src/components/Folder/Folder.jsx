@@ -82,7 +82,7 @@ function Folder(props) {
           onBlur={() => {
             setTimeout(() => {
               setMenuClicked(false);
-            }, 70);
+            }, 100);
           }}
         >
           <MoreVertIcon />

@@ -11,10 +11,8 @@ import styles from './NoteBoard.module.scss';
 import axios from 'axios';
 import { Folder } from '../Folder';
 import { useEffect } from 'react';
-import loading from '../../images/loading2.gif';
 import { FolderBackButton } from '../Buttons/FolderBackButton';
 import classNames from 'classnames/bind';
-import { Link } from '@material-ui/core';
 import { useRef } from 'react';
 
 function NoteBoard(props) {
@@ -77,6 +75,7 @@ function NoteBoard(props) {
   }, [setDBnotes, user]);
 
   async function changeFolder(type, folderId) {
+    setIsLoading(true);
     if (type === 'back') {
       folderId = currentFolder.parent;
       setPath((prev) => {
@@ -107,7 +106,7 @@ function NoteBoard(props) {
         return newPath;
       });
     }
-
+    setIsLoading(false);
     setCurrentFolder(response.data);
     setDBnotes(response.data.folderContent);
   }
@@ -180,28 +179,33 @@ function NoteBoard(props) {
   }
   return (
     <>
+      <AddNoteForm addNote={addNote} />
+      {currentFolder && (
+        <h1 className={classes('folderTitle', { dark: darkTheme })}>
+          {path.map((element, index) => {
+            return (
+              <p
+                className={styles.path}
+                key={index}
+                onClick={() => changeFolder('link', element.id)}
+              >
+                /{element.title}
+              </p>
+            );
+          })}
+        </h1>
+      )}
       {isloading ? (
-        <>
-          <img src={loading} className="mainLoader" alt="" />
-        </>
+        <div className={styles.openFolderLoader}>
+          <Loader
+            type="Audio"
+            color={darkTheme ? 'white' : '#f5ba13'}
+            height={150}
+            width={150}
+          />
+        </div>
       ) : (
         <>
-          <AddNoteForm addNote={addNote} />
-          {currentFolder && (
-            <h1 className={classes('folderTitle', { dark: darkTheme })}>
-              {path.map((element, index) => {
-                return (
-                  <Link
-                    key={index}
-                    onClick={() => changeFolder('link', element.id)}
-                  >
-                    /{element.title}
-                  </Link>
-                );
-              })}
-            </h1>
-          )}
-
           {DBnotes.map((element, index) => {
             if (element.type === 'note') {
               return (

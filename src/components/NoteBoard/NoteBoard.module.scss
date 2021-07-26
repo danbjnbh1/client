@@ -14,3 +14,17 @@
     color: #fff;
   }
 }
+
+.path {
+  display: inline-block;
+  color: gray;
+  cursor: pointer;
+  &:hover {
+    text-decoration: underline;
+    color: darkslategray;
+  }
+}
+.openFolderLoader {
+  text-align: center;
+  margin-top: 100px;
+}

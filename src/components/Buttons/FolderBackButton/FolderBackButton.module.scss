@@ -16,6 +16,8 @@
   vertical-align: unset;
   &.dark {
     @include secondaryDark();
-    background-color: darkgray !important;
+  }
+  &:hover{
+    background-color: darkslategray !important;
   }
 }

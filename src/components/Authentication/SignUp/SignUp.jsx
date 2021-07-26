@@ -37,6 +37,7 @@ function SignUp(props) {
         setEmailValid('This email already exists');
       } else {
         setUser({ data });
+        localStorage.setItem('user', JSON.stringify({ data }));
       }
     } else {
       setError('Please fill in all the fields correctly');
