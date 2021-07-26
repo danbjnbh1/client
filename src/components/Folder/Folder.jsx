@@ -67,6 +67,7 @@ function Folder(props) {
           disabled={!edit}
           type="text"
           value={name}
+          maxlength="10"
           onChange={(event) => hundleInputChange(event.target)}
           id={props.id}
           onBlur={() => setEdit(false)}

@@ -4,10 +4,14 @@ import { NoteBoard } from './NoteBoard';
 import { Footer } from './Footer';
 import { AuthenticationRouting } from './Authentication/AuthenticationRouting';
 import loading2 from '../images/loading2.gif';
+import styles from './App.module.scss';
+import classNames from 'classnames/bind';
 
 const themeContext = createContext();
 const userContext = createContext();
 const loaderContext = createContext();
+
+const classes = classNames.bind(styles);
 
 function App() {
   const [user, setUser] = useState(false);
@@ -20,9 +24,9 @@ function App() {
   useEffect(() => {
     const bodyElt = document.querySelector('html');
     if (darkTheme) {
-      bodyElt.classList.add('darkTheme-body');
+      bodyElt.classList.add(classes('darkThemeBody'));
     } else {
-      bodyElt.classList.remove('darkTheme-body');
+      bodyElt.classList.remove(classes('darkThemeBody'));
     }
   }, [darkTheme]);
 

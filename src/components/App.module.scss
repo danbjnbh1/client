@@ -12,3 +12,30 @@ $primaryYellow: #f5ba13;
   color: #dddddd !important;
   box-shadow: 0 3px 5px rgb(14, 13, 13) !important;
 }
+
+svg {
+  /* center Fab text */
+  vertical-align: unset;
+}
+
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+  font-family: 'Montserrat', sans-serif;
+}
+body {
+  background: inherit;
+  padding: 0 16px;
+}
+
+.darkThemeBody {
+  background-color: #222831;
+  color: #dddddd;
+  box-shadow: 0 3px 5px rgb(10, 10, 10);
+}

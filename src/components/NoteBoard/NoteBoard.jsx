@@ -96,8 +96,11 @@ function NoteBoard(props) {
         return newPath;
       });
     }
+    axiosUrl.current = axios.create({
+      baseURL: `http://localhost:3001/${folderId}`,
+    });
     sessionStorage.setItem('currentFolder', folderId);
-    const response = await axios.get(`http://localhost:3001/${folderId}/notes`);
+    const response = await axiosUrl.current.get(`/notes`);
     if (type === 'open') {
       setPath((prev) => {
         let newPath = prev;
@@ -149,7 +152,10 @@ function NoteBoard(props) {
     const newDB = [...props.DBnotes];
     newDB.splice(folderIndex, 1);
     props.setDBnotes(newDB);
-    await axiosUrl.current.delete('/deleteFolder', { data: { folderId } });
+    const { data } = await axiosUrl.current.delete('/deleteFolder', {
+      data: { folderId },
+    });
+    console.log(data);
   }
 
   async function deleteNote(noteIndex, noteId) {
@@ -237,8 +243,8 @@ function NoteBoard(props) {
             <Loader
               type="ThreeDots"
               color={darkTheme ? 'white' : '#f5ba13'}
-              height={50}
-              width={50}
+              height={30}
+              width={30}
               visible={addLoader > 0}
             />
           </div>
