@@ -4,14 +4,17 @@ import styles from './Folder.module.scss';
 import classNames from 'classnames/bind';
 import { themeContext } from '../App';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
-import DropDownMenu from '../DropDownMenu/DropDownMenu';
+import { DropDownMenu } from '../DropDownMenu';
+import { Popup } from '../Popup';
 import Button from '@material-ui/core/Button';
 
 function Folder(props) {
   const { darkTheme } = useContext(themeContext);
   const [name, setName] = useState('');
   const [edit, setEdit] = useState(false);
+  const [deleteClick, setDeteleClick] = useState(false);
   const [menuClicked, setMenuClicked] = useState(false);
+
   const timer = useRef();
 
   const classes = classNames.bind(styles);
@@ -26,8 +29,9 @@ function Folder(props) {
     document.getElementById(props.id).select();
   }
 
-  async function hundleDeleteClick() {
+  async function hundleDelete() {
     props.deleteFunction(props.index, props.id);
+    setDeteleClick(false);
   }
 
   function hundleInputChange({ id, value }) {
@@ -49,25 +53,36 @@ function Folder(props) {
   }
 
   return (
-    <div
-      onClick={(event) => {
-        hundleFolderClick();
-      }}
-      className={classes('folder', { dark: darkTheme })}
-    >
-      <FolderIcon />
+    <div class={classes('folder', { dark: darkTheme })}>
+      <div
+        onClick={() => {
+          hundleFolderClick();
+        }}
+        className={classes('folderTitle', { dark: darkTheme })}
+      >
+        <FolderIcon />
 
-      <input
-        className={classes('folderName')}
-        disabled={!edit}
-        type="text"
-        value={name}
-        onChange={(event) => hundleInputChange(event.target)}
-        id={props.id}
-        onBlur={() => setEdit(false)}
-      />
-
-      <div className={classes('folderOptionsButton')}>
+        <input
+          className={classes('folderName')}
+          disabled={!edit}
+          type="text"
+          value={name}
+          onChange={(event) => hundleInputChange(event.target)}
+          id={props.id}
+          onBlur={() => setEdit(false)}
+        />
+      </div>
+      <div
+        onClick={() => {
+          setMenuClicked(!menuClicked);
+        }}
+        onBlur={() => {
+          setTimeout(() => {
+            setMenuClicked(false);
+          }, 100);
+        }}
+        className={classes('folderOptionsButton')}
+      >
         <Button
           style={{
             maxWidth: '30px',
@@ -75,31 +90,32 @@ function Folder(props) {
             minWidth: '30px',
             minHeight: '50px',
           }}
-          onClick={(event) => {
-            event.stopPropagation();
-            setMenuClicked(!menuClicked);
-          }}
-          onBlur={() => {
-            setTimeout(() => {
-              setMenuClicked(false);
-            }, 100);
-          }}
         >
           <MoreVertIcon />
         </Button>
+        {menuClicked && (
+          <DropDownMenu
+            show={menuClicked}
+            menuItems={[
+              {
+                title: 'Delete',
+                function: () => {
+                  setDeteleClick(true);
+                },
+              },
+              { title: 'Rename', function: hundleEditClick },
+            ]}
+          />
+        )}
       </div>
-      {menuClicked && (
-        <DropDownMenu
-          show={menuClicked}
-          menuItems={[
-            {
-              title: 'Delete',
-              function: hundleDeleteClick,
-            },
-            { title: 'Rename', function: hundleEditClick },
-          ]}
-        />
-      )}
+
+      <Popup show={deleteClick}>
+        <p>Are you sure you want to delete this folder?</p>
+        <Button onClick={hundleDelete} color="primary">
+          yes
+        </Button>
+        <Button onClick={() => setDeteleClick(false)}>no</Button>
+      </Popup>
     </div>
   );
 }

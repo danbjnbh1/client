@@ -9,7 +9,6 @@ const themeContext = createContext();
 const userContext = createContext();
 const loaderContext = createContext();
 
-
 function App() {
   const [user, setUser] = useState(false);
 
@@ -62,13 +61,12 @@ function App() {
                   <>
                     <Title logout={logout} user={user} />
                     <NoteBoard DBnotes={DBnotes} setDBnotes={setDBnotes} />
-                    <Footer />
                   </>
                 )}
-                <Footer />
               </div>
             </>
           )}
+          <Footer />
         </loaderContext.Provider>
       </themeContext.Provider>
     </userContext.Provider>

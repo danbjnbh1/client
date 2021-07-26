@@ -20,7 +20,7 @@ function SignUp(props) {
   const [error, setError] = useState();
 
   const localURL = `http://localhost:3001/signUp`;
-  const herokuURL = `https://keeperplus.herokuapp.com/signUp`;
+  // const herokuURL = `https://keeperplus.herokuapp.com/signUp`;
   const signUpHttp = axios.create({
     baseURL: localURL,
   });

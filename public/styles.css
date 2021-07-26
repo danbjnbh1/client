@@ -37,4 +37,7 @@ svg {
   border-radius: 5%;
 }
 
-
+.popup{
+  position: absolute;
+  right: 50%;
+  }
