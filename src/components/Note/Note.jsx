@@ -1,24 +1,24 @@
-import React, { useState, useContext, useRef,useEffect } from 'react';
-import deleteImg from '../../images/deleteNote.png';
+import React, { useState, useContext, useRef, useEffect } from 'react';
 import { themeContext } from '../App';
 import styles from './Note.module.scss';
 import { TextareaAutosize } from '@material-ui/core';
 import classNames from 'classnames/bind';
+import IconButton from '@material-ui/core/IconButton';
+import DeleteIcon from '@material-ui/icons/Delete';
 
 function Note(props) {
   const { darkTheme } = useContext(themeContext);
 
-  const [isOver, setIsOver] = useState(false);
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
+  const [title, setTitle] = useState('');
+  const [content, setContent] = useState('');
   const timer = useRef();
 
-  let classes = classNames.bind(styles)
+  let classes = classNames.bind(styles);
 
   useEffect(() => {
-    setTitle(props.noteHeading)
+    setTitle(props.noteHeading);
     setContent(props.noteContent);
-  },[props.noteContent, props.noteHeading])
+  }, [props.noteContent, props.noteHeading]);
 
   function changeNote({ value, id, name }) {
     if (name === 'content') {
@@ -36,21 +36,12 @@ function Note(props) {
     }, 1000);
   }
 
-  function mouseOver() {
-    setIsOver(true);
-  }
-  function mouseOut() {
-    setIsOver(false);
-  }
-
   return (
     <div
       className={`${styles.note} + ${darkTheme ? styles.dark : null}`}
       id={props.id}
-      onMouseEnter={mouseOver}
-      onMouseLeave={mouseOut}
     >
-      <input
+      <TextareaAutosize
         type="text"
         name="title"
         className={classes('noteHeadingInput', 'noteInput')}
@@ -63,21 +54,20 @@ function Note(props) {
         type="text"
         name="content"
         id={props.id}
-        className={`${styles.noteContentInput} + ${styles.noteInput}`}
+        className={classes('noteContentInput', 'noteInput')}
         onChange={(event) => changeNote(event.target)}
         value={content}
       />
-      {isOver && (
-        <img
-          className={styles.deleteBtn}
-          id={props.id}
-          onClick={() => {
-            props.deleteFunction(props.index, props.id);
-          }}
-          src={deleteImg}
-          alt=""
-        />
-      )}
+      <IconButton
+        onClick={() => {
+          props.deleteFunction(props.index, props.id);
+        }}
+        size="small"
+        color="inherit"
+        className={classes('deleteBtn')}
+      >
+        <DeleteIcon />
+      </IconButton>
     </div>
   );
 }

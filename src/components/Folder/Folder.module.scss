@@ -31,6 +31,8 @@
   input {
     border: none;
     cursor: pointer;
+    text-overflow: ellipsis;
+    width: 150px;
   }
 }
 
@@ -47,6 +49,7 @@
 .folderOptionsButton {
   display: inline;
   position: relative;
+  color: inherit;
   right: 0px;
   top: 0px;
 }

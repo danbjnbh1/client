@@ -67,7 +67,7 @@ function Folder(props) {
           disabled={!edit}
           type="text"
           value={name}
-          maxlength="10"
+          maxLength="13"
           onChange={(event) => hundleInputChange(event.target)}
           id={props.id}
           onBlur={() => setEdit(false)}
@@ -90,6 +90,7 @@ function Folder(props) {
             maxHeight: '50px',
             minWidth: '30px',
             minHeight: '50px',
+            color: 'inherit'
           }}
         >
           <MoreVertIcon />

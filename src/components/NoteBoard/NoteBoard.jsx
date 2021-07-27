@@ -6,7 +6,6 @@ import { userContext, themeContext } from '../App';
 import { AddNoteForm } from '../AddNoteForm';
 import { AddNoteButton } from '../Buttons/AddNoteButton';
 import { AddFolderButton } from '../Buttons/AddFolderButton';
-import Loader from 'react-loader-spinner';
 import { Note } from '../Note';
 import styles from './NoteBoard.module.scss';
 import axios from 'axios';
