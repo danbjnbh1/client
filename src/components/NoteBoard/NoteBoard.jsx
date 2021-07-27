@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // const herokuURL = `https://keeperplus.herokuapp.com/${folderId}/notes`;
 
 import React, { useState, useContext } from 'react';
@@ -10,6 +11,9 @@ import { Note } from '../Note';
 import styles from './NoteBoard.module.scss';
 import axios from 'axios';
 import { Folder } from '../Folder';
+import { Path } from '../Path';
+import { OpenFolderLoader } from '../Loaders/OpenFolderLoader';
+import { AddLoader } from '../Loaders/AddLoader';
 import { useEffect } from 'react';
 import { FolderBackButton } from '../Buttons/FolderBackButton';
 import classNames from 'classnames/bind';
@@ -21,10 +25,10 @@ function NoteBoard(props) {
   const [currentFolder, setCurrentFolder] = useState();
   const [backButton, setBackButton] = useState(true);
   const [path, setPath] = useState();
+  const [DBnotes, setDBnotes] = useState([]);
 
   const axiosUrl = useRef();
 
-  const { DBnotes, setDBnotes } = props;
   const { user } = useContext(userContext);
   const { darkTheme } = useContext(themeContext);
 
@@ -39,7 +43,7 @@ function NoteBoard(props) {
     } else {
       setCurrentFolder(user.data.mainFolder);
     }
-  }, [currentFolder, user.data.mainFolder]);
+  }, [currentFolder, user]);
 
   useEffect(() => {
     // on component render set path, current folder, sessionStorages, fetch notes.
@@ -72,7 +76,7 @@ function NoteBoard(props) {
       setIsLoading(false);
     }
     fetchData();
-  }, [setDBnotes, user]);
+  }, [user]);
 
   async function changeFolder(type, folderId) {
     setIsLoading(true);
@@ -145,13 +149,13 @@ function NoteBoard(props) {
     });
     setAddLoader((prevState) => prevState - 1);
     setCurrentFolder(data);
-    props.setDBnotes(data.folderContent);
+    setDBnotes(data.folderContent);
   }
 
   async function deleteFolder(folderIndex, folderId) {
-    const newDB = [...props.DBnotes];
+    const newDB = [...DBnotes];
     newDB.splice(folderIndex, 1);
-    props.setDBnotes(newDB);
+    setDBnotes(newDB);
     const { data } = await axiosUrl.current.delete('/deleteFolder', {
       data: { folderId },
     });
@@ -159,9 +163,9 @@ function NoteBoard(props) {
   }
 
   async function deleteNote(noteIndex, noteId) {
-    const newDB = [...props.DBnotes];
+    const newDB = [...DBnotes];
     newDB.splice(noteIndex, 1);
-    props.setDBnotes(newDB);
+    setDBnotes(newDB);
     await axiosUrl.current.delete('/deleteNote', { data: { noteId } });
   }
 
@@ -186,31 +190,11 @@ function NoteBoard(props) {
   return (
     <>
       <AddNoteForm addNote={addNote} />
-      {currentFolder && (
-        <h1 className={classes('folderTitle', { dark: darkTheme })}>
-          {path.map((element, index) => {
-            return (
-              <p
-                className={styles.path}
-                key={index}
-                onClick={() => changeFolder('link', element.id)}
-              >
-                /{element.title}
-              </p>
-            );
-          })}
-        </h1>
-      )}
-      {isloading ? (
-        <div className={styles.openFolderLoader}>
-          <Loader
-            type="Audio"
-            color={darkTheme ? 'white' : '#f5ba13'}
-            height={150}
-            width={150}
-          />
-        </div>
-      ) : (
+      <Path path={path} show={currentFolder} changeFolder={changeFolder} />
+
+      <OpenFolderLoader show={isloading} />
+
+      {!isloading && (
         <>
           {DBnotes.map((element, index) => {
             if (element.type === 'note') {
@@ -239,16 +223,8 @@ function NoteBoard(props) {
               );
             } else return null;
           })}
-          <div className={styles.addLoader}>
-            <Loader
-              type="ThreeDots"
-              color={darkTheme ? 'white' : '#f5ba13'}
-              height={30}
-              width={30}
-              visible={addLoader > 0}
-            />
-          </div>
-          {backButton ? <FolderBackButton changeFolder={changeFolder} /> : null}
+          <AddLoader show={addLoader} />
+          <FolderBackButton show={backButton} changeFolder={changeFolder} />
           <AddFolderButton addFolder={addFolder} />
           <AddNoteButton addNote={addNote} />
         </>

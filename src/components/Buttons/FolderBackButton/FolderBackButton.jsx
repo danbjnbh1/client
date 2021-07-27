@@ -9,9 +9,11 @@ function FolderBackButton(props) {
   const { darkTheme } = useContext(themeContext);
   const classes = classNames.bind(styles);
 
+  if (!props.show) return null;
+
   return (
     <Fab
-      class={classes('button', {dark: darkTheme})}
+      class={classes('button', { dark: darkTheme })}
       onClick={() => props.changeFolder('back')}
     >
       <ArrowBackIcon fontSize="inherit" />

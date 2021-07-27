@@ -1,0 +1,19 @@
+.path {
+  display: inline-block;
+  color: gray;
+  cursor: pointer;
+  &:hover {
+    text-decoration: underline;
+    color: darkslategray;
+  }
+}
+
+.folderTitle {
+  text-align: center;
+  font-family: 'McLaren', cursive;
+  font-weight: 200;
+
+  &.dark {
+    color: #fff;
+  }
+}

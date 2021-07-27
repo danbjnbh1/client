@@ -3,7 +3,6 @@ import Title from './Header/Title/Title';
 import { NoteBoard } from './NoteBoard';
 import { Footer } from './Footer';
 import { AuthenticationRouting } from './Authentication/AuthenticationRouting';
-import loading2 from '../images/loading2.gif';
 import styles from './App.module.scss';
 import classNames from 'classnames/bind';
 
@@ -16,9 +15,6 @@ const classes = classNames.bind(styles);
 function App() {
   const [user, setUser] = useState(false);
 
-  const [isloading, setIsLoading] = useState(false);
-
-  const [DBnotes, setDBnotes] = useState([]);
   const [darkTheme, setDarkTheme] = useState(false);
 
   useEffect(() => {
@@ -48,30 +44,20 @@ function App() {
   return (
     <userContext.Provider value={{ user, logout, setUser }}>
       <themeContext.Provider value={{ darkTheme, setDarkTheme }}>
-        <loaderContext.Provider value={{ setIsLoading }}>
-          {isloading ? (
+        <div>
+          {!user ? (
             <>
-              <img src={loading2} className="mainLoader" alt="" />
+              <Title />
+              <AuthenticationRouting />
             </>
           ) : (
             <>
-              <div>
-                {!user ? (
-                  <>
-                    <Title />
-                    <AuthenticationRouting />
-                  </>
-                ) : (
-                  <>
-                    <Title logout={logout} user={user} />
-                    <NoteBoard DBnotes={DBnotes} setDBnotes={setDBnotes} />
-                  </>
-                )}
-              </div>
+              <Title logout={logout} user={user} />
+              <NoteBoard />
             </>
           )}
-          <Footer />
-        </loaderContext.Provider>
+        </div>
+        <Footer />
       </themeContext.Provider>
     </userContext.Provider>
   );
