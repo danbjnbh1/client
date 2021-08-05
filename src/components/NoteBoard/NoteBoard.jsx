@@ -17,14 +17,14 @@ import { useEffect } from 'react';
 import { FolderBackButton } from '../Buttons/FolderBackButton';
 import classNames from 'classnames/bind';
 import { useRef } from 'react';
+import { Redirect } from 'react-router-dom';
 
 function NoteBoard(props) {
   const [addLoader, setAddLoader] = useState(0);
-  const [isloading, setIsLoading] = useState(false);
+  const [folderLoading, setFolderLoading] = useState(false);
   const [currentFolder, setCurrentFolder] = useState();
   const [backButton, setBackButton] = useState(true);
   const [path, setPath] = useState();
-  const [DBnotes, setDBnotes] = useState([]);
 
   const axiosUrl = useRef();
 
@@ -34,51 +34,50 @@ function NoteBoard(props) {
   let classes = classNames.bind(styles);
 
   useEffect(() => {
-    // when folder change set currentFolder state
-    if (currentFolder) {
-      if (currentFolder._id === user.data.mainFolder._id) {
-        setBackButton(false);
-      } else setBackButton(true);
-    } else {
-      setCurrentFolder(user.data.mainFolder);
-    }
-  }, [currentFolder, user]);
-
-  useEffect(() => {
     // on component render set path, current folder, sessionStorages, fetch notes.
     let folderStorage = sessionStorage.getItem('currentFolder');
+
     if (!folderStorage) {
-      sessionStorage.setItem('currentFolder', user.data.mainFolder._id);
-      folderStorage = user.data.mainFolder._id;
+      sessionStorage.setItem('currentFolder', user.mainFolderId);
+      folderStorage = user.mainFolderId;
     }
+
     let pathStorage = JSON.parse(sessionStorage.getItem('path'));
     if (!pathStorage) {
       sessionStorage.setItem(
         'path',
-        JSON.stringify([{ title: 'main', id: user.data.mainFolder._id }])
+        JSON.stringify([{ title: 'main', id: user.mainFolderId }])
       );
     }
 
     pathStorage = JSON.parse(sessionStorage.getItem('path'));
     setPath(pathStorage);
-    setCurrentFolder(folderStorage);
 
     axiosUrl.current = axios.create({
       baseURL: `http://localhost:3001/${folderStorage}`,
     });
 
     async function fetchData() {
-      setIsLoading(true);
+      setFolderLoading(true);
       const response = await axiosUrl.current.get('/notes');
+      console.log(response.data);
       setCurrentFolder(response.data);
-      setDBnotes(response.data.folderContent);
-      setIsLoading(false);
+      setFolderLoading(false);
     }
     fetchData();
   }, [user]);
 
+  useEffect(() => {
+    // when folder change set back button state
+    if (currentFolder?._id === user.mainFolderId) {
+      setBackButton(false);
+    } else setBackButton(true);
+  }, [currentFolder, user]);
+
   async function changeFolder(type, folderId) {
-    setIsLoading(true);
+    if (addLoader) return null;
+
+    setFolderLoading(true);
     if (type === 'back') {
       folderId = currentFolder.parent;
       setPath((prev) => {
@@ -112,9 +111,8 @@ function NoteBoard(props) {
         return newPath;
       });
     }
-    setIsLoading(false);
+    setFolderLoading(false);
     setCurrentFolder(response.data);
-    setDBnotes(response.data.folderContent);
   }
 
   async function addFolder() {
@@ -128,7 +126,6 @@ function NoteBoard(props) {
 
     setAddLoader((prevState) => prevState - 1);
     setCurrentFolder(data);
-    setDBnotes(data.folderContent);
   }
 
   async function addNote(title, content) {
@@ -148,24 +145,31 @@ function NoteBoard(props) {
     });
     setAddLoader((prevState) => prevState - 1);
     setCurrentFolder(data);
-    setDBnotes(data.folderContent);
   }
 
-  async function deleteFolder(folderIndex, folderId) {
-    const newDB = [...DBnotes];
-    newDB.splice(folderIndex, 1);
-    setDBnotes(newDB);
-    const { data } = await axiosUrl.current.delete('/deleteFolder', {
-      data: { folderId },
+  async function deleteFolder(folderId) {
+    await axiosUrl.current.delete('/deleteFolder', { data: { folderId } });
+    setCurrentFolder((prev) => {
+      const folderCopy = { ...prev };
+      const index = folderCopy.folderContent.findIndex(
+        (element) => element._id === folderId
+      );
+      folderCopy.folderContent.splice(index, 1);
+      return folderCopy;
     });
-    console.log(data);
   }
 
-  async function deleteNote(noteIndex, noteId) {
-    const newDB = [...DBnotes];
-    newDB.splice(noteIndex, 1);
-    setDBnotes(newDB);
+  async function deleteNote(noteId) {
     await axiosUrl.current.delete('/deleteNote', { data: { noteId } });
+    setCurrentFolder((prev) => {
+      const folderCopy = { ...prev };
+      const index = folderCopy.folderContent.findIndex(
+        (element) => element._id === noteId
+      );
+      console.log(index);
+      folderCopy.folderContent.splice(index, 1);
+      return folderCopy;
+    });
   }
 
   async function editNote(noteId, value, elementToChange) {
@@ -175,7 +179,6 @@ function NoteBoard(props) {
       elementToChange: elementToChange,
     });
     setCurrentFolder(response.data);
-    setDBnotes(response.data.folderContent);
   }
 
   async function editFolder(FolderId, value) {
@@ -184,23 +187,22 @@ function NoteBoard(props) {
       value: value,
     });
     setCurrentFolder(response.data);
-    setDBnotes(response.data.folderContent);
   }
+
   return (
     <>
       <AddNoteForm addNote={addNote} />
       <Path path={path} show={currentFolder} changeFolder={changeFolder} />
 
-      <OpenFolderLoader show={isloading} />
+      <OpenFolderLoader show={folderLoading} />
 
-      {!isloading && (
+      {!folderLoading && (
         <>
-          {DBnotes.map((element, index) => {
+          {currentFolder?.folderContent.map((element, index) => {
             if (element.type === 'note') {
               return (
                 <Note
-                  key={index}
-                  index={index}
+                  key={element._id}
                   id={element._id}
                   noteHeading={element.title}
                   noteContent={element.content}
@@ -211,8 +213,7 @@ function NoteBoard(props) {
             } else if (element.type === 'folder') {
               return (
                 <Folder
-                  key={index}
-                  index={index}
+                  key={element._id}
                   id={element._id}
                   folderName={element.title}
                   deleteFunction={deleteFolder}

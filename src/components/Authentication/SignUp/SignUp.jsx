@@ -3,9 +3,10 @@ import { themeContext, userContext } from '../../App';
 import styles from './SignUp.module.scss';
 import Loader from 'react-loader-spinner';
 import axios from 'axios';
+import { Link, Redirect } from 'react-router-dom';
 
 function SignUp(props) {
-  const { setUser } = useContext(userContext);
+  const { setUser, user } = useContext(userContext);
   const { darkTheme } = useContext(themeContext);
 
   const [name, setName] = useState();
@@ -36,8 +37,7 @@ function SignUp(props) {
       if (data === 'this email exist') {
         setEmailValid('This email already exists');
       } else {
-        setUser({ data });
-        localStorage.setItem('user', JSON.stringify({ data }));
+        setUser({ email: data.email, mainFolderId: data.mainFolder._id, name: data.name });
       }
     } else {
       setError('Please fill in all the fields correctly');
@@ -53,7 +53,6 @@ function SignUp(props) {
       setEmailValid(true);
     } else {
       setEmailValid('invalid email.');
-      // document.getElementById('invalid-email').innerHTML = 'invalid email.';
     }
   }
   function nameChange(event) {
@@ -86,6 +85,10 @@ function SignUp(props) {
     } else {
       setPassword2Valid(false);
     }
+  }
+
+  if (user) {
+    return <Redirect to="/dashboard" />;
   }
 
   return (
@@ -184,12 +187,14 @@ function SignUp(props) {
               Sign Up
             </button>
             <p className="ms-2 d-inline"></p>
-            <button
-              className="btn-link"
-              onClick={() => props.setIsRegister(true)}
-            >
-              Log in with an existing user
-            </button>
+            <Link to="/login">
+              <button
+                className="btn-link"
+                // onClick={() => props.setIsRegister(true)}
+              >
+                Log in with an existing user
+              </button>
+            </Link>
             <p />
           </div>
         )}

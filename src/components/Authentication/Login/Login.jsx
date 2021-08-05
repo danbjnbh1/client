@@ -3,9 +3,10 @@ import { themeContext, userContext } from '../../App';
 import styles from './Login.module.scss';
 import Loader from 'react-loader-spinner';
 import axios from 'axios';
+import { Redirect, Link } from 'react-router-dom';
 
 function Login(props) {
-  const { setUser } = useContext(userContext);
+  const { setUser, user } = useContext(userContext);
   const { darkTheme } = useContext(themeContext);
 
   const [password, setPassword] = useState('');
@@ -13,8 +14,10 @@ function Login(props) {
   const [error, setError] = useState(false);
   const [loginLoader, setLoginLoader] = useState(false);
 
+  const localURL = `http://localhost:3001/login`;
+  // const herokuURL = `https://keeperplus.herokuapp.com/login`;
   const loginHttp = axios.create({
-    baseURL: `https://keeperplus.herokuapp.com/login`,
+    baseURL: localURL,
   });
 
   function changeEmail(event) {
@@ -30,16 +33,20 @@ function Login(props) {
   async function sendLogin(event) {
     event.preventDefault();
     setLoginLoader(true);
-
-    const { data } = await loginHttp.post('', { email, password });
-
+    const { data } = await loginHttp.post('', {
+      email,
+      password,
+    });
     setLoginLoader(false);
     if (!data) {
       setError('Incorrect account details');
     } else {
-      localStorage.setItem('user', JSON.stringify({ data }));
-      setUser({ data });
+      setUser({ email: data.email, mainFolderId: data.mainFolder._id, name: data.name });
     }
+  }
+
+  if (user) {
+    return <Redirect to="/dashboard" />;
   }
 
   return (
@@ -83,12 +90,14 @@ function Login(props) {
             </button>
             <p className="ms-2 d-inline">
               New in Keeper?{' '}
-              <button
-                className="btn-link"
-                onClick={() => props.setIsRegister(false)}
-              >
-                Creat an account
-              </button>
+              <Link to="/signup">
+                <button
+                  className="btn-link"
+                  // onClick={() => props.setIsRegister(false)}
+                >
+                  Creat an account
+                </button>
+              </Link>
             </p>
           </div>
         )}

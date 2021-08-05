@@ -3,7 +3,6 @@ import { Login } from '../Login';
 import { SignUp } from '../SignUp';
 
 function AuthenticationRouting(props) {
-
   const [isRegister, setIsRegister] = useState(true);
 
   return (

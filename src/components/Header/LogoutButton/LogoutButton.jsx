@@ -11,7 +11,7 @@ function LogoutButton(props) {
   return (
     <div>
       <p className={styles.helloGreeting}>
-        Hello {props.user.data.name}{' '}
+        Hello {props.user.name}{' '}
         <button onClick={props.logout}>Log out</button>
       </p>
     </div>

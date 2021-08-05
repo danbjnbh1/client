@@ -8,10 +8,11 @@ export default function OpenFolderLoader(props) {
   return (
     <div className={styles.openFolderLoader}>
       <Loader
-        type="Audio"
+        type="MutatingDots"
         color={darkTheme ? 'white' : '#f5ba13'}
-        height={150}
-        width={150}
+        secondaryColor={darkTheme ? 'white' : '#f5ba13'}
+        height={100}
+        width={100}
         visible={props.show}
       />
     </div>

@@ -19,7 +19,7 @@ function ThemeButton() {
     <Fab
       onClick={() => {
         setDarkTheme(!darkTheme);
-        sessionStorage.setItem('darkTheme', !darkTheme)
+        localStorage.setItem('darkTheme', !darkTheme)
       }}
       style={changeThemeBtnStyle}
     >

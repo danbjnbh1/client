@@ -5,12 +5,14 @@ import { TextareaAutosize } from '@material-ui/core';
 import classNames from 'classnames/bind';
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
+import { DeleteLoader } from '../Loaders/DeleteLoader';
 
 function Note(props) {
   const { darkTheme } = useContext(themeContext);
 
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
+  const [deleteLoader, setDeleteLoader] = useState(false);
   const timer = useRef();
 
   let classes = classNames.bind(styles);
@@ -19,6 +21,11 @@ function Note(props) {
     setTitle(props.noteHeading);
     setContent(props.noteContent);
   }, [props.noteContent, props.noteHeading]);
+
+  async function hundleDelete() {
+    setDeleteLoader(true);
+    props.deleteFunction(props.id);
+  }
 
   function changeNote({ value, id, name }) {
     if (name === 'content') {
@@ -58,16 +65,18 @@ function Note(props) {
         onChange={(event) => changeNote(event.target)}
         value={content}
       />
-      <IconButton
-        onClick={() => {
-          props.deleteFunction(props.index, props.id);
-        }}
-        size="small"
-        color="inherit"
-        className={classes('deleteBtn')}
-      >
-        <DeleteIcon />
-      </IconButton>
+      {!deleteLoader ? (
+        <IconButton
+          onClick={hundleDelete}
+          size="small"
+          color="inherit"
+          className={classes('deleteBtn')}
+        >
+          <DeleteIcon />
+        </IconButton>
+      ) : (
+        <DeleteLoader className={"deleteNoteLoader"}/>
+      )}
     </div>
   );
 }

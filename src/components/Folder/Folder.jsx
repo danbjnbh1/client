@@ -7,6 +7,7 @@ import MoreVertIcon from '@material-ui/icons/MoreVert';
 import { DropDownMenu } from '../DropDownMenu';
 import { Popup } from '../Popup';
 import Button from '@material-ui/core/Button';
+import { DeleteLoader } from '../Loaders/DeleteLoader';
 
 function Folder(props) {
   const { darkTheme } = useContext(themeContext);
@@ -14,8 +15,10 @@ function Folder(props) {
   const [edit, setEdit] = useState(false);
   const [deleteClick, setDeteleClick] = useState(false);
   const [menuClicked, setMenuClicked] = useState(false);
+  const [deleteLoader, setDeleteLoader] = useState(false);
 
   const timer = useRef();
+  const input = useRef();
 
   const classes = classNames.bind(styles);
 
@@ -23,25 +26,26 @@ function Folder(props) {
     setName(props.folderName);
   }, [props.folderName]);
 
-  async function hundleEditClick() {
-    await setEdit(true);
-    document.getElementById(props.id).focus();
-    document.getElementById(props.id).select();
-  }
+  useEffect(() => {
+    if (!edit) return null;
+    input.current.focus();
+    input.current.select();
+  }, [edit, props.id]);
 
   async function hundleDelete() {
-    props.deleteFunction(props.index, props.id);
+    setDeleteLoader(true);
     setDeteleClick(false);
+    props.deleteFunction(props.id);
   }
 
-  function hundleInputChange({ id, value }) {
+  function hundleInputChange({ value }) {
     setName(value);
     if (timer.current) {
       clearTimeout(timer.current);
     }
 
     timer.current = setTimeout(() => {
-      props.editFolder(id, value);
+      props.editFolder(props.id, value);
       timer.current = null;
     }, 1000);
   }
@@ -67,49 +71,53 @@ function Folder(props) {
           disabled={!edit}
           type="text"
           value={name}
-          maxLength="13"
+          maxLength="18"
           onChange={(event) => hundleInputChange(event.target)}
-          id={props.id}
+          ref={input}
           onBlur={() => setEdit(false)}
         />
       </div>
-      <div
-        onClick={() => {
-          setMenuClicked(!menuClicked);
-        }}
-        onBlur={() => {
-          setTimeout(() => {
-            setMenuClicked(false);
-          }, 100);
-        }}
-        className={classes('folderOptionsButton')}
-      >
-        <Button
-          style={{
-            maxWidth: '30px',
-            maxHeight: '50px',
-            minWidth: '30px',
-            minHeight: '50px',
-            color: 'inherit'
+      {!deleteLoader ? (
+        <div
+          onClick={() => {
+            setMenuClicked(!menuClicked);
           }}
+          onBlur={() => {
+            setTimeout(() => {
+              setMenuClicked(false);
+            }, 100);
+          }}
+          className={classes('folderOptionsButton')}
         >
-          <MoreVertIcon />
-        </Button>
-        {menuClicked && (
-          <DropDownMenu
-            show={menuClicked}
-            menuItems={[
-              {
-                title: 'Delete',
-                function: () => {
-                  setDeteleClick(true);
+          <Button
+            style={{
+              maxWidth: '30px',
+              maxHeight: '50px',
+              minWidth: '30px',
+              minHeight: '50px',
+              color: 'inherit',
+            }}
+          >
+            <MoreVertIcon />
+          </Button>
+          {menuClicked && (
+            <DropDownMenu
+              show={menuClicked}
+              menuItems={[
+                {
+                  title: 'Delete',
+                  function: () => {
+                    setDeteleClick(true);
+                  },
                 },
-              },
-              { title: 'Rename', function: hundleEditClick },
-            ]}
-          />
-        )}
-      </div>
+                { title: 'Rename', function: () => setEdit(true) },
+              ]}
+            />
+          )}
+        </div>
+      ) : (
+        <DeleteLoader className="deleteFolderLoader"/>
+      )}
 
       <Popup show={deleteClick}>
         <p>Are you sure you want to delete this folder?</p>

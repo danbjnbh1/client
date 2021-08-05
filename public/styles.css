@@ -4,4 +4,24 @@
   color: #2272c2;
 }
 
+svg {
+  /* center Fab text */
+  vertical-align: unset;
+}
 
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+  font-family: 'Montserrat', sans-serif;
+}
+body {
+  overflow-y: scroll; /* Show scrollbars */
+  background: inherit;
+  padding: 0 16px;
+}

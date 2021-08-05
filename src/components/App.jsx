@@ -2,10 +2,21 @@ import React, { useState, useEffect, createContext } from 'react';
 import Title from './Header/Title/Title';
 import { NoteBoard } from './NoteBoard';
 import { Footer } from './Footer';
-import { AuthenticationRouting } from './Authentication/AuthenticationRouting';
 import styles from './App.module.scss';
 import classNames from 'classnames/bind';
-
+import { AppLoader } from './Loaders/AppLoader';
+import {
+  Redirect,
+  BrowserRouter as Router,
+  Route,
+  Switch,
+} from 'react-router-dom';
+import { Login } from './Authentication/Login';
+import { SignUp } from './Authentication/SignUp';
+import ProtectedRoute from './ProtectedRoute/ProtectedRoute';
+import axios from 'axios';
+axios.defaults.withCredentials = true;
+axios.defaults.baseURL = 'http://localhost:3001';
 const themeContext = createContext();
 const userContext = createContext();
 const loaderContext = createContext();
@@ -14,7 +25,7 @@ const classes = classNames.bind(styles);
 
 function App() {
   const [user, setUser] = useState(false);
-
+  const [loader, setLoader] = useState(false);
   const [darkTheme, setDarkTheme] = useState(false);
 
   useEffect(() => {
@@ -27,36 +38,47 @@ function App() {
   }, [darkTheme]);
 
   useEffect(() => {
-    const themeStorage = sessionStorage.getItem('darkTheme') === 'true';
-    const userStorage = localStorage.getItem('user');
+    const themeStorage = localStorage.getItem('darkTheme') === 'true';
     setDarkTheme(themeStorage);
-    if (userStorage) {
-      setUser(JSON.parse(userStorage));
-    }
+    const fetchCookie = async () => {
+      setLoader(true);
+      const { data } = await axios.post('/tokenCheck');
+      setUser(data);
+      setLoader(false);
+    };
+    fetchCookie();
   }, []);
 
   function logout() {
-    localStorage.clear();
-    sessionStorage.clear();
+    const clearCookie = async () => {
+      await axios.post('/clearCookie');
+    };
+    clearCookie();
+    sessionStorage.removeItem('currentFolder')
     setUser(false);
   }
 
   return (
     <userContext.Provider value={{ user, logout, setUser }}>
       <themeContext.Provider value={{ darkTheme, setDarkTheme }}>
-        <div>
-          {!user ? (
-            <>
-              <Title />
-              <AuthenticationRouting />
-            </>
-          ) : (
-            <>
-              <Title logout={logout} user={user} />
-              <NoteBoard />
-            </>
-          )}
-        </div>
+        <Title logout={logout} user={user} />
+        {loader ? (
+          <AppLoader />
+        ) : (
+          <Router>
+            <Switch>
+              <Route exact path="/login" component={Login} />
+              <Route exact path="/signup" component={SignUp} />
+              <ProtectedRoute
+                path="/dashboard"
+                component={NoteBoard}
+              ></ProtectedRoute>
+              <Route path="/">
+                <Redirect to="/dashboard" />
+              </Route>
+            </Switch>
+          </Router>
+        )}
         <Footer />
       </themeContext.Provider>
     </userContext.Provider>
