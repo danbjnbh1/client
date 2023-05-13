@@ -40,21 +40,19 @@ function App() {
   useEffect(() => {
     const themeStorage = localStorage.getItem('darkTheme') === 'true';
     setDarkTheme(themeStorage);
-    const fetchCookie = async () => {
+    (async () => {
       setLoader(true);
       const { data } = await axios.post('/tokenCheck');
       setUser(data);
       setLoader(false);
-    };
-    fetchCookie();
+    })();
   }, []);
 
   function logout() {
-    const clearCookie = async () => {
-      await axios.post('/clearCookie');
-    };
-    clearCookie();
-    sessionStorage.removeItem('currentFolder')
+    (() => {
+      axios.post('/clearCookie');
+    })();
+    sessionStorage.removeItem('currentFolder');
     setUser(false);
   }
 
@@ -72,8 +70,9 @@ function App() {
               <ProtectedRoute
                 path="/dashboard"
                 component={NoteBoard}
+                user={user}
               ></ProtectedRoute>
-              <Route path="/">
+              <Route exact path="/">
                 <Redirect to="/dashboard" />
               </Route>
             </Switch>

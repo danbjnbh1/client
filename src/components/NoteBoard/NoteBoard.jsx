@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 // const herokuURL = `https://keeperplus.herokuapp.com/${folderId}/notes`;
 
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useCallback, useRef } from 'react';
 import { userContext, themeContext } from '../App';
 import { AddNoteForm } from '../AddNoteForm';
 import { AddNoteButton } from '../Buttons/AddNoteButton';
@@ -16,8 +16,7 @@ import { AddLoader } from '../Loaders/AddLoader';
 import { useEffect } from 'react';
 import { FolderBackButton } from '../Buttons/FolderBackButton';
 import classNames from 'classnames/bind';
-import { useRef } from 'react';
-import { Redirect } from 'react-router-dom';
+import Masonry from 'react-masonry-css';
 
 function NoteBoard(props) {
   const [addLoader, setAddLoader] = useState(0);
@@ -25,13 +24,45 @@ function NoteBoard(props) {
   const [currentFolder, setCurrentFolder] = useState();
   const [backButton, setBackButton] = useState(true);
   const [path, setPath] = useState();
-
+  const [notes, setNotes] = useState();
+  const [isNewDir, setIsNewDir] = useState(true);
   const axiosUrl = useRef();
+
+  const observer = useRef();
+  const lastNoteRef = useCallback(
+    (node) => {
+      if (observer.current) {
+        observer.current.disconnect();
+      }
+      observer.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting) {
+          if (!currentFolder) return;
+          setNotes((prev) => {
+            return [...currentFolder.folderContent].slice(0, prev.length + 8);
+          });
+        }
+      });
+      if (node) observer.current.observe(node);
+    },
+    [currentFolder]
+  );
 
   const { user } = useContext(userContext);
   const { darkTheme } = useContext(themeContext);
 
   let classes = classNames.bind(styles);
+
+  useEffect(() => {
+    if (!currentFolder) return;
+    if (isNewDir || notes.length < 8) {
+      setNotes([...currentFolder.folderContent.slice(0, 8)]);
+    } else {
+      setNotes((prev) => {
+        return [...currentFolder.folderContent.slice(0, prev.length)];
+      });
+    }
+    setIsNewDir(false);
+  }, [currentFolder, isNewDir, notes?.length]);
 
   useEffect(() => {
     // on component render set path, current folder, sessionStorages, fetch notes.
@@ -60,8 +91,8 @@ function NoteBoard(props) {
     async function fetchData() {
       setFolderLoading(true);
       const response = await axiosUrl.current.get('/notes');
-      console.log(response.data);
       setCurrentFolder(response.data);
+      setIsNewDir(true);
       setFolderLoading(false);
     }
     fetchData();
@@ -113,6 +144,7 @@ function NoteBoard(props) {
     }
     setFolderLoading(false);
     setCurrentFolder(response.data);
+    setIsNewDir(true);
   }
 
   async function addFolder() {
@@ -166,7 +198,6 @@ function NoteBoard(props) {
       const index = folderCopy.folderContent.findIndex(
         (element) => element._id === noteId
       );
-      console.log(index);
       folderCopy.folderContent.splice(index, 1);
       return folderCopy;
     });
@@ -198,32 +229,52 @@ function NoteBoard(props) {
 
       {!folderLoading && (
         <>
-          {currentFolder?.folderContent.map((element, index) => {
-            if (element.type === 'note') {
-              return (
-                <Note
-                  key={element._id}
-                  id={element._id}
-                  noteHeading={element.title}
-                  noteContent={element.content}
-                  deleteFunction={deleteNote}
-                  editNote={editNote}
-                />
-              );
-            } else if (element.type === 'folder') {
-              return (
-                <Folder
-                  key={element._id}
-                  id={element._id}
-                  folderName={element.title}
-                  deleteFunction={deleteFolder}
-                  editFolder={editFolder}
-                  changeFolder={changeFolder}
-                />
-              );
-            } else return null;
-          })}
-          <AddLoader show={addLoader} />
+          {/* <MasonryLayout notes={currentFolder?.folderContent || []} /> */}
+          <Masonry
+            breakpointCols={{
+              default: 4,
+              1250: 3,
+              1000: 2,
+              700: 1,
+            }}
+            className={styles.myMasonryGrid}
+            columnClassName={styles.myMasonryGridColumn}
+          >
+            {notes?.map((element, index) => {
+              let ref;
+              if (notes.length === index + 1) {
+                ref = lastNoteRef;
+              }
+              if (element.type === 'note') {
+                return (
+                  <div key={index} ref={ref}>
+                    <Note
+                      key={element._id}
+                      id={element._id}
+                      noteHeading={element.title}
+                      noteContent={element.content}
+                      deleteFunction={deleteNote}
+                      editNote={editNote}
+                    />
+                  </div>
+                );
+              } else if (element.type === 'folder') {
+                return (
+                  <div key={index} ref={ref}>
+                    <Folder
+                      key={element._id}
+                      id={element._id}
+                      folderName={element.title}
+                      deleteFunction={deleteFolder}
+                      editFolder={editFolder}
+                      changeFolder={changeFolder}
+                    />
+                  </div>
+                );
+              } else return null;
+            })}
+            <AddLoader key={0} show={addLoader} />
+          </Masonry>
           <FolderBackButton show={backButton} changeFolder={changeFolder} />
           <AddFolderButton addFolder={addFolder} />
           <AddNoteButton addNote={addNote} />

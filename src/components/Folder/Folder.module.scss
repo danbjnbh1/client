@@ -8,7 +8,6 @@
   width: 240px;
   margin: 16px;
   height: 50px;
-  float: left;
   vertical-align: top;
   &.dark {
     @include primaryDark();

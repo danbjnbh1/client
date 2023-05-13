@@ -5,7 +5,7 @@ import Loader from 'react-loader-spinner';
 import axios from 'axios';
 import { Link, Redirect } from 'react-router-dom';
 
-function SignUp(props) {
+function SignUp() {
   const { setUser, user } = useContext(userContext);
   const { darkTheme } = useContext(themeContext);
 
